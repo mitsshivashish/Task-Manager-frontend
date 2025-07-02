@@ -9,6 +9,7 @@ export const API_PATHS = {
     REGISTER: "/api/auth/register", // Register a new user (Admin or Member)
     LOGIN: "/api/auth/login", // Authenticate user & return JWT token
     GET_PROFILE: "/api/auth/profile", // Get logged-in user details
+    UPDATE_ROLE_ORG: "/api/auth/update-role-org", // Update user role and organization
     FORGOT_PASSWORD: "/api/auth/forgot-password", // Request password reset
     VERIFY_OTP: "/api/auth/verify-otp", // Verify OTP for password reset
     RESET_PASSWORD: "/api/auth/reset-password", // Reset password with token
@@ -34,6 +35,7 @@ export const API_PATHS = {
 
     UPDATE_TASK_STATUS: (taskId) => `/api/tasks/${taskId}/status`, // Update task status
     UPDATE_TODO_CHECKLIST: (taskId) => `/api/tasks/${taskId}/todo`, // Update todo checklist
+    GET_CHECKPOINT_STATS: (taskId) => `/api/tasks/${taskId}/checkpoint-stats`, // Get per-user checkpoint completion stats
   },
 
   REPORTS: {

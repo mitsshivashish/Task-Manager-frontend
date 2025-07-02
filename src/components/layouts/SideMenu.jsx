@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SIDE_MENU_DATA, SIDE_MENU_USER_DATA } from "../../utils/data";
 import { UserContext } from "../../context/userContext";
 import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../../utils/ApiPaths";
 
 const SideMenu = ({ activeMenu }) => {
   const { user, clearUser } = useContext(UserContext);
@@ -37,7 +38,7 @@ const SideMenu = ({ activeMenu }) => {
     setOrgCodeLoading(true);
     setOrgCodeError("");
     try {
-      const res = await fetch("/api/org-code");
+      const res = await fetch(`${BASE_URL}/api/org-code`);
       const data = await res.json();
       if (data.orgCode) {
         setOrgCode(data.orgCode);

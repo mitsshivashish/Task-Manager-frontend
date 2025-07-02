@@ -5,7 +5,7 @@ import { useState } from "react";
 import Input from "../../components/Inputs/Input";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosInstance";
-import { API_PATHS } from "../../utils/ApiPaths";
+import { API_PATHS, BASE_URL } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
 import googleIcon from "../../assets/images/985_google_g_icon.jpg";
 
@@ -62,7 +62,7 @@ const Login = () => {
     }
   };
 
-  const GOOGLE_AUTH_URL = "/api/auth/google"; // Update if backend URL changes
+  const GOOGLE_AUTH_URL = `${BASE_URL}/api/auth/google`; // Use backend URL from ApiPaths
 
   return (
     <AuthLayout>

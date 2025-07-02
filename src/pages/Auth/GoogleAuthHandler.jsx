@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
 
 export default function GoogleAuthHandler() {
@@ -28,7 +29,7 @@ export default function GoogleAuthHandler() {
       // Store token
       sessionStorage.setItem("token", token);
       // Fetch user details from DB
-      axios.get("/api/auth/profile", {
+      axios.get(API_PATHS.AUTH.GET_PROFILE, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((userRes) => {
@@ -54,7 +55,7 @@ export default function GoogleAuthHandler() {
     setLoading(true);
     try {
       const res = await axios.post(
-        "/api/auth/update-role-org",
+        API_PATHS.AUTH.UPDATE_ROLE_ORG,
         {
           organizationCode: orgCode,
           adminInviteToken: adminToken || undefined,
@@ -66,7 +67,7 @@ export default function GoogleAuthHandler() {
       // Store token
       sessionStorage.setItem("token", res.data.token);
       // Fetch user details from DB
-      const userRes = await axios.get("/api/auth/profile", {
+      const userRes = await axios.get(API_PATHS.AUTH.GET_PROFILE, {
         headers: { Authorization: `Bearer ${res.data.token}` },
       });
       sessionStorage.setItem("user", JSON.stringify(userRes.data));

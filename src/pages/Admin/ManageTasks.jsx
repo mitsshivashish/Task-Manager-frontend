@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../utils/axiosInstance'
-import { API_PATHS } from '../../utils/ApiPaths'
+import { API_PATHS, BASE_URL } from '../../utils/ApiPaths'
 import { LuFileSpreadsheet } from 'react-icons/lu'
 import TaskStatusTabs from '../../components/TaskStatusTabs'
 import TaskCard from '../../components/Cards/TaskCard'
@@ -75,7 +75,7 @@ const ManageTasks = () => {
 
   const fetchCheckpointStats = async (taskId, taskTitle) => {
     try {
-      const response = await axiosInstance.get(`/api/tasks/${taskId}/checkpoint-stats`);
+      const response = await axiosInstance.get(API_PATHS.TASKS.GET_CHECKPOINT_STATS(taskId));
       setCheckpointStats(response.data.stats);
       setStatsTaskTitle(taskTitle);
       setShowStatsModal(true);
