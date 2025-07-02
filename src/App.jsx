@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Login from './pages/Auth/Login'
 import SignUp from './pages/Auth/SignUp'
-import Dashboard from './pages/Admin/Dashboard'
+import Dashboard, { AdminUpdateProfilePage } from './pages/Admin/Dashboard'
 import ManageUsers from './pages/Admin/ManageUsers'
 import MyTasks from './pages/User/MyTasks'
 import ManageTasks from './pages/Admin/ManageTasks'
@@ -12,11 +12,11 @@ import PrivateRoute from './routes/PrivateRoute'
 import UserProvider, { UserContext } from './context/userContext'
 import { Toaster } from "react-hot-toast";
 import UserDashboard from './pages/User/DashBoard'
-import UpdateProfile from './pages/User/UpdateProfile'
 import ForgotPassword from './pages/Auth/ForgotPassword'
 import ResetPassword from './pages/Auth/ResetPassword'
 import VerifyOTP from './pages/Auth/VerifyOTP'
 import GoogleAuthHandler from './pages/Auth/GoogleAuthHandler'
+import UserUpdateProfilePage from './pages/User/UserUpdateProfilePage'
 
 const App = () => {
   return (
@@ -37,7 +37,7 @@ const App = () => {
             <Route path='/admin/tasks' element={<ManageTasks></ManageTasks>}></Route>
             <Route path='/admin/create-task' element={<CreateTask></CreateTask>}></Route>
             <Route path='/admin/users' element={<ManageUsers></ManageUsers>}></Route>
-            <Route path='/admin/update-profile' element={<UpdateProfile />}></Route>
+            <Route path='/admin/update-profile' element={<AdminUpdateProfilePage />}></Route>
           </Route>
 
           {/* {User Routes} */}
@@ -45,7 +45,7 @@ const App = () => {
             <Route path='/user/dashboard' element = {<UserDashboard></UserDashboard>}></Route>
             <Route path='/user/tasks' element = {<MyTasks></MyTasks>}></Route>
             <Route path='/user/task-details/:id' element = {<ViewTaskDetails></ViewTaskDetails>}></Route>
-            <Route path='/user/update-profile' element={<UpdateProfile />}></Route>
+            <Route path='/user/update-profile' element={<UserUpdateProfilePage />}></Route>
           </Route>
           <Route path='/' element = {<Root></Root>}></Route>
         </Routes>

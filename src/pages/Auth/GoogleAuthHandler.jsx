@@ -3,24 +3,29 @@ import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
+import { useLoading } from "../../context/loadingContext";
 
 export default function GoogleAuthHandler() {
   const navigate = useNavigate();
   const { updateUser } = useContext(UserContext);
+  const { setDashboardLoading } = useLoading();
   const [orgCode, setOrgCode] = useState("");
   const [adminToken, setAdminToken] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start loading immediately
   const [token, setToken] = useState("");
   const [showOrgForm, setShowOrgForm] = useState(false);
 
   // Parse query params and decide flow
   useEffect(() => {
+    setDashboardLoading(true); // Show dashboard skeleton immediately
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const organizationCode = params.get("organizationCode");
     if (!token) {
       setError("Google authentication failed.");
+      setLoading(false);
+      setDashboardLoading(false); // Hide skeleton if auth fails
       return;
     }
     setToken(token);
@@ -29,12 +34,15 @@ export default function GoogleAuthHandler() {
       // Store token
       sessionStorage.setItem("token", token);
       // Fetch user details from DB
-      axios.get(API_PATHS.AUTH.GET_PROFILE, {
+      axios
+        .get(API_PATHS.AUTH.GET_PROFILE, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((userRes) => {
           sessionStorage.setItem("user", JSON.stringify(userRes.data));
           updateUser({ ...userRes.data, token });
+          setLoading(false);
+          // Do NOT setDashboardLoading(false) here!
           if (userRes.data.role === "admin") {
             navigate("/admin/dashboard");
           } else {
@@ -43,16 +51,21 @@ export default function GoogleAuthHandler() {
         })
         .catch((err) => {
           setError("Failed to fetch user details.");
+          setLoading(false);
+          setDashboardLoading(false); // Hide skeleton if auth fails
         });
     } else {
       setShowOrgForm(true);
+      setLoading(false);
+      setDashboardLoading(false); // Hide skeleton if org form is needed
     }
-  }, [navigate, updateUser]);
+  }, [navigate, updateUser, setDashboardLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    setDashboardLoading(true); // Show dashboard skeleton immediately
     try {
       const res = await axios.post(
         API_PATHS.AUTH.UPDATE_ROLE_ORG,
@@ -72,6 +85,8 @@ export default function GoogleAuthHandler() {
       });
       sessionStorage.setItem("user", JSON.stringify(userRes.data));
       updateUser({ ...userRes.data, token: res.data.token });
+      setLoading(false);
+      // Do NOT setDashboardLoading(false) here!
       // Redirect to dashboard based on role
       if (userRes.data.role === "admin") {
         navigate("/admin/dashboard");
@@ -80,10 +95,14 @@ export default function GoogleAuthHandler() {
       }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to update info.");
-    } finally {
       setLoading(false);
+      setDashboardLoading(false); // Hide skeleton if org update fails
     }
   };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-100 text-lg font-semibold">Loading...</div>;
+  }
 
   if (error) {
     return <div className="text-red-500 text-center mt-8">{error}</div>;

@@ -236,19 +236,16 @@ const CreateTask = () => {
               />
             </div>
 
-            <div className="mt-3">
-              <label className="text-xs font-medium text-slate-600">
-                Description
-              </label>
-
+            {/* Description Input */}
+            <div className="sticky top-0 z-20 bg-white pb-4">
+              <label htmlFor="description" className="text-xs font-medium text-slate-600">Describe Task</label>
               <textarea
-                placeholder="Describe task"
-                className="form-input"
-                rows={4}
+                id="description"
+                className="form-input h-32 overflow-y-auto resize-none mt-1"
+                rows={6}
                 value={taskData.description}
-                onChange={({ target }) =>
-                  handleValueChange("description", target.value)
-                }
+                onChange={e => handleValueChange('description', e.target.value)}
+                placeholder="Describe the task in detail..."
               />
             </div>
 
@@ -279,6 +276,7 @@ const CreateTask = () => {
                     handleValueChange("dueDate", target.value)
                   }
                   type="date"
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
 

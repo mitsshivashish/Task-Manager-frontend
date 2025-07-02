@@ -3,6 +3,7 @@ import { SIDE_MENU_DATA, SIDE_MENU_USER_DATA } from "../../utils/data";
 import { UserContext } from "../../context/userContext";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../utils/ApiPaths";
+import LogoutModal from "../LogoutModal";
 
 const SideMenu = ({ activeMenu }) => {
   const { user, clearUser } = useContext(UserContext);
@@ -11,12 +12,13 @@ const SideMenu = ({ activeMenu }) => {
   const [orgCode, setOrgCode] = useState("");
   const [orgCodeLoading, setOrgCodeLoading] = useState(false);
   const [orgCodeError, setOrgCodeError] = useState("");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const navigate = useNavigate();
 
   const handleClick = (route) => {
     if (route === "logout") {
-      handleLogout();
+      setShowLogoutModal(true);
       return;
     }
     if (route === "/admin/org-code") {
@@ -114,8 +116,13 @@ const SideMenu = ({ activeMenu }) => {
       ))}
       {/* Organization Code Modal */}
       {showOrgCode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white rounded-lg shadow-lg p-8 min-w-[320px] text-center relative">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center min-h-screen bg-black/30"
+          onClick={e => {
+            if (e.target === e.currentTarget) setShowOrgCode(false);
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 sm:p-8 text-center relative mx-2">
             <button
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
               onClick={() => setShowOrgCode(false)}
@@ -136,6 +143,12 @@ const SideMenu = ({ activeMenu }) => {
           </div>
         </div>
       )}
+      {/* Logout Confirmation Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 };

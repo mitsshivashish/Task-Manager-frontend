@@ -1,11 +1,10 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { useUserAuth } from '../../hooks/useUserAuth'
 import { UserContext } from '../../context/userContext';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/ApiPaths';
-import { useEffect } from 'react';
 import moment from 'moment';
 import InfoCard from '../../components/Cards/InfoCard';
 import { addThousandsSeparator } from '../../utils/helper';
@@ -13,6 +12,9 @@ import { LuArrowRight } from 'react-icons/lu';
 import TaskListTable from '../../components/TaskListTable';
 import CustomPieChart from '../../components/Charts/CustomPieChart';
 import CustomBarChart from '../../components/Charts/CustomBarChart';
+import DashboardSkeleton from '../../components/DashboardSkeleton';
+import { useLoading } from '../../context/loadingContext';
+import UpdateProfile from "../User/UpdateProfile";
 
 const COLORS = ["#8051FF" , "#008808" , "#7BCE00"];
 
@@ -23,6 +25,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  const { dashboardLoading, setDashboardLoading } = useLoading();
   const [dashboardData , setDashboardData] = useState(null);
   const [pieChartData , setPieChartData] = useState([]);
   const [barChartData , setBarChartData] = useState([]);
@@ -58,6 +61,8 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching users : " , error);
+    } finally {
+      setDashboardLoading(false);
     }
   };
 
@@ -71,6 +76,10 @@ const Dashboard = () => {
     getDashboardData();
     return () => {};
   }, []);
+
+  if (dashboardLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return <DashboardLayout activeMenu="Dashboard">
     <div className='card my-5'>
@@ -136,4 +145,10 @@ const Dashboard = () => {
     </DashboardLayout>
 }
 
-export default Dashboard
+export const AdminUpdateProfilePage = () => (
+  <DashboardLayout activeMenu="Update Profile">
+    <UpdateProfile />
+  </DashboardLayout>
+);
+
+export default Dashboard;

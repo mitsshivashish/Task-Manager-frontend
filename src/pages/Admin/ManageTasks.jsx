@@ -7,6 +7,7 @@ import { LuFileSpreadsheet } from 'react-icons/lu'
 import TaskStatusTabs from '../../components/TaskStatusTabs'
 import TaskCard from '../../components/Cards/TaskCard'
 import Modal from '../../components/Modal'
+import TaskCardSkeleton from '../../components/Cards/TaskCardSkeleton'
 
 const ManageTasks = () => {
 
@@ -17,11 +18,12 @@ const ManageTasks = () => {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [selectedUserStats, setSelectedUserStats] = useState(null);
   const [statsTaskTitle, setStatsTaskTitle] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   
   const getAllTasks =  async () => {
-
+    setLoading(true);
     try {
       const response = await axiosInstance.get(API_PATHS.TASKS.GET_ALL_TASKS  , {
         params : {
@@ -44,6 +46,8 @@ const ManageTasks = () => {
       setTabs(statusArray);
     } catch (error) {
       console.error("Error fetching Tasks : " , error)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,39 +115,43 @@ const ManageTasks = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {allTasks?.map((item,index) => (
-            <div key={item._id}>
-              <TaskCard
-                title={item.title}
-                description={item.description}
-                priority={item.priority}
-                status={item.status}
-                progress={item.progress}
-                createdAt={item.createdAt}
-                dueDate={item.dueDate}
-                assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
-                attachmentCount={item.attachments?.length || 0}
-                completedTodoCount={item.completedTodoCount || 0}
-                todoChecklist={item.todoChecklist || []}
-                onClick={() => {
-                  handleClicks(item)
-                }}
-              />
-              {/* Per-user checkpoint completion UI */}
-              <div className="mt-2 px-4">
-                <button
-                  className="flex items-center gap-2 text-sm font-semibold border border-blue-500 text-blue-600 rounded-lg px-3 py-1.5 bg-white hover:bg-blue-50 transition shadow-sm"
-                  onClick={() => fetchCheckpointStats(item._id, item.title)}
-                >
-                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m6 0a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
-                  View Task Done By User
-                </button>
+          {loading ? (
+            <TaskCardSkeleton count={6} />
+          ) : (
+            [...allTasks]?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((item,index) => (
+              <div key={item._id}>
+                <TaskCard
+                  title={item.title}
+                  description={item.description}
+                  priority={item.priority}
+                  status={item.status}
+                  progress={item.progress}
+                  createdAt={item.createdAt}
+                  dueDate={item.dueDate}
+                  assignedTo={item.assignedTo?.map((item) => item.profileImageUrl)}
+                  attachmentCount={item.attachments?.length || 0}
+                  completedTodoCount={item.completedTodoCount || 0}
+                  todoChecklist={item.todoChecklist || []}
+                  onClick={() => {
+                    handleClicks(item)
+                  }}
+                />
+                {/* Per-user checkpoint completion UI */}
+                <div className="mt-2 px-4">
+                  <button
+                    className="flex items-center gap-2 text-sm font-semibold border border-blue-500 text-blue-600 rounded-lg px-3 py-1.5 bg-white hover:bg-blue-50 transition shadow-sm"
+                    onClick={() => fetchCheckpointStats(item._id, item.title)}
+                  >
+                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m6 0a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+                    View Task Done By User
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         {/* Modal for per-user checkpoint stats */}
-        <Modal isOpen={showStatsModal} onClose={() => { setShowStatsModal(false); setSelectedUserStats(null); }} title={`Task Done By User${statsTaskTitle ? ` - ${statsTaskTitle}` : ''}`}>
+        <Modal isOpen={showStatsModal} onClose={() => { setShowStatsModal(false); setSelectedUserStats(null); }} title={`Task Done By User${statsTaskTitle ? ` - ${statsTaskTitle}` : ''}`} closeOnOutsideClick={true}>
           {selectedUserStats ? (
             <div>
               <div className="flex items-center gap-3 mb-4 bg-white rounded-lg shadow border border-gray-200 p-3">
@@ -162,10 +170,18 @@ const ManageTasks = () => {
                   </li>
                 ))}
               </ul>
+              <div className="flex justify-end mt-4">
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-semibold"
+                  onClick={() => setSelectedUserStats(null)}
+                >
+                  Back to Users
+                </button>
+              </div>
             </div>
           ) : (
             <div>
-              <div className="mb-2 text-sm font-medium text-gray-700">Click a user below to see their checkpoints:</div>
+              <div className="mb-2 text-sm font-semibold text-white">Click a user below to see their checkpoints:</div>
               {checkpointStats.length === 0 && <div className="text-gray-500 text-xs">No checkpoints completed yet.</div>}
               <div className="space-y-3">
                 {checkpointStats.map((stat, idx) => (

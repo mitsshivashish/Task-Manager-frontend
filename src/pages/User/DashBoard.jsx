@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useUserAuth } from "../../hooks/useUserAuth";
-import { useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
@@ -13,21 +12,20 @@ import { LuArrowRight } from "react-icons/lu";
 import TaskListTable from "../../components/TaskListTable";
 import CustomPieChart from "../../components/Charts/CustomPieChart";
 import CustomBarChart from "../../components/Charts/CustomBarChart";
+import DashboardSkeleton from '../../components/DashboardSkeleton';
+import { useLoading } from '../../context/loadingContext';
 
 const COLORS = ["#8D51FF", "#00B8DB", "#7BCE00"];
-
 
 const UserDashboard = () => {
   useUserAuth();
 
   const { user } = useContext(UserContext);
-
   const navigate = useNavigate();
-
+  const { dashboardLoading, setDashboardLoading } = useLoading();
   const [dashboardData, setDashboardData] = useState(null);
   const [pieChartData, setPieChartData] = useState([]);
   const [barChartData, setBarChartData] = useState([]);
-
 
   // Prepare Chart Data
   const prepareChartData = (data) => {
@@ -62,10 +60,12 @@ const UserDashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setDashboardLoading(false);
     }
   };
 
-  const onSeeMore = ()=>{
+  const onSeeMore = () =>{
     navigate('/admin/tasks')
   }
 
@@ -75,6 +75,10 @@ const UserDashboard = () => {
     getDashboardData();
     return () => {};
   }, []);
+
+  if (dashboardLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <DashboardLayout activeMenu="Dashboard">
@@ -124,7 +128,6 @@ const UserDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 md:my-6">
-        
         <div>
           <div className="card">
             <div className="flex items-center justify-between">

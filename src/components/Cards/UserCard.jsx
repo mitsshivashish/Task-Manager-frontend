@@ -49,7 +49,7 @@ const UserCard = ({userInfo, onDelete}) => {
           </div>
         </div>
       </div>
-      <div className="flex items-end gap-3 mt-5">
+      <div className="flex justify-between items-end mt-5 px-1">
         <StatCard
           label="Pending"
           count={userInfo?.pendingTasks || 0}
@@ -85,18 +85,21 @@ const StatCard = ({label , count , status}) => {
         const getStatusTagColor = () => {
             switch (status) {
                 case "In Progress":
-                    return "text-cyan-500 bg-gray-50"
+                    return "text-cyan-900 bg-cyan-100"
                     
                 case "Completed":
-                    return "text-indigo-500 bg-gray-50"
+                    return "text-indigo-900 bg-indigo-100"
             
                 default:
-                    return "text-violet-500 bg-gray-50"
+                    return "text-violet-900 bg-violet-100"
             }
         }
 
         return (
-            <div className={`flex-1 text-[10px] font-medium ${getStatusTagColor()} px-4 py-0.5 rounded `}>
-        <span className="text-[12px] font-semibold">{count}</span> <br /> {label}</div>
+            <div className={`flex-1 text-[10px] font-medium ${getStatusTagColor()} px-4 py-2 rounded-full shadow-sm m-1 text-center`}
+                style={{ boxShadow: '0 2px 8px 0 rgba(80,80,180,0.07)' }}>
+                <span className="text-[13px] font-semibold">{count}</span> <br />
+                <span className="whitespace-nowrap">{label}</span>
+            </div>
         )
 };
