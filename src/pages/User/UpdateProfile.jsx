@@ -52,7 +52,7 @@ const UpdateProfile = () => {
         profileImageUrl = uploadRes.data?.imageUrl;
       }
       // Update user details
-      const res = await axiosInstance.put(API_PATHS.AUTH.GET_PROFILE, {
+      const res = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, {
         name,
         email,
         profileImageUrl,
