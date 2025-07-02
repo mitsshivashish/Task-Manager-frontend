@@ -40,8 +40,8 @@ const AddMembersModal = ({ isOpen, onClose, allUsers, tempSelectedUsers, toggleU
                 <input
                   type="checkbox"
                   checked={tempSelectedUsers.includes(user._id)}
+                  onChange={() => toggleUserSelection(user._id)}
                   onClick={e => e.stopPropagation()}
-                  readOnly
                   className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded-sm outline-none cursor-pointer"
                 />
               </div>
