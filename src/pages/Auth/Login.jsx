@@ -9,6 +9,7 @@ import { API_PATHS, BASE_URL } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
 import googleIcon from "../../assets/images/985_google_g_icon.jpg";
 import { useLoading } from "../../context/loadingContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +54,24 @@ const Login = () => {
       }
     } catch (error) {
       if (error.response && error.response.data.message) {
-        setError(error.response.data.message);
+        const errorMessage = error.response.data.message;
+        
+        // Check if user has pending OTP verification
+        if (errorMessage.includes("Registration already pending") && errorMessage.includes("verify OTP")) {
+          // Show toast notification
+          toast.error("Registration pending! Please verify your OTP to complete registration.");
+          
+          // Redirect to OTP verification page with email
+          navigate("/verify-otp", { 
+            state: { 
+              email: email, 
+              isRegistration: true 
+            } 
+          });
+          return;
+        }
+        
+        setError(errorMessage);
       } else {
         setError("Something went wrong. Please try again.");
       }

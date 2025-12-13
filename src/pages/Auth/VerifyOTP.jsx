@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { verifyOTP, verifyRegistrationOTP } from '../../utils/authApi';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/ApiPaths';
+import toast from 'react-hot-toast';
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -10,6 +13,7 @@ const VerifyOTP = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   // Determine if this is for registration or password reset
   const isRegistration = location.state?.isRegistration;
 
@@ -41,6 +45,37 @@ const VerifyOTP = () => {
     }
   };
 
+  const handleResendOTP = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setResendLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      if (isRegistration) {
+        // Resend registration OTP
+        await axiosInstance.post(API_PATHS.AUTH.RESEND_REGISTRATION_OTP, { email });
+        toast.success('New OTP sent to your email!');
+        setMessage('New OTP sent to your email. Please check your inbox.');
+      } else {
+        // For password reset, we can reuse the forgot password endpoint
+        await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, { email });
+        toast.success('New OTP sent to your email!');
+        setMessage('New OTP sent to your email. Please check your inbox.');
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to resend OTP';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
@@ -65,12 +100,40 @@ const VerifyOTP = () => {
           />
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            className={`w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 ${loading ? 'opacity-75' : ''}`}
             disabled={loading}
+            style={loading ? { cursor: 'not-allowed' } : {}}
           >
-            {loading ? 'Verifying...' : 'Verify OTP'}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Verifying...
+              </div>
+            ) : (
+              'Verify OTP'
+            )}
           </button>
         </form>
+        
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handleResendOTP}
+            disabled={resendLoading}
+            className="text-blue-600 hover:text-blue-800 underline disabled:opacity-50"
+            style={resendLoading ? { cursor: 'not-allowed' } : {}}
+          >
+            {resendLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                Sending...
+              </div>
+            ) : (
+              'Resend OTP'
+            )}
+          </button>
+        </div>
+
         {message && <div className="mt-4 text-green-600">{message}</div>}
         {error && <div className="mt-4 text-red-600">{error}</div>}
       </div>

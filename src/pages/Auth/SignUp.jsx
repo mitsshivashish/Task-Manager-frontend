@@ -8,6 +8,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
 import uploadImage from "../../utils/uploadImage";
+import toast from "react-hot-toast";
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -17,42 +18,51 @@ const SignUp = () => {
   const [adminInviteToken, setAdminInviteToken] = useState("");
   const [organizationCode, setOrganizationCode] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const {updateUser} = useContext(UserContext)
+  const { updateUser } = useContext(UserContext)
   const navigate = useNavigate();
 
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
     let profileImageUrl = ''
 
     if (!profilePic) {
       setError("Profile image is required.");
+      setLoading(false);
       return;
     }
 
     if (!fullName) {
       setError("Please enter valid fullname.");
+      setLoading(false);
       return;
     }
 
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
+      setLoading(false);
       return;
     }
 
     if (!password) {
       setError("Please enter the password");
+      setLoading(false);
       return;
     }
 
     if (!organizationCode) {
       setError("Organization code is required.");
+      setLoading(false);
       return;
     }
     if (!/^[0-9]{14}$/.test(organizationCode)) {
       setError("Organization code must be exactly 14 digits.");
+      setLoading(false);
       return;
     }
 
@@ -62,10 +72,10 @@ const SignUp = () => {
       const imgUploadRes = await uploadImage(profilePic)
       profileImageUrl = imgUploadRes.imageUrl || ""
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER , {
-        name : fullName ,
-        email ,
-        password , 
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: fullName,
+        email,
+        password,
         profileImageUrl,
         adminInviteToken,
         organizationCode
@@ -76,10 +86,28 @@ const SignUp = () => {
 
     } catch (error) {
       if (error.response && error.response.data.message) {
-        setError(error.response.data.message)
+        const errorMessage = error.response.data.message;
+
+        // Check if user has pending OTP verification
+        if (errorMessage.includes("Registration already pending") && errorMessage.includes("verify OTP")) {
+          // Show toast notification
+          toast.error("Registration pending! Please verify your OTP to complete registration.");
+
+          // Redirect to OTP verification page with email
+          navigate("/verify-otp", {
+            state: {
+              email: email,
+              isRegistration: true
+            }
+          });
+          return;
+        }
+
+        setError(errorMessage);
       } else {
         setError("Something went wrong. Please try again.");
       }
+      setLoading(false);
     }
   };
   return (
@@ -131,28 +159,45 @@ const SignUp = () => {
 
             <Input
               value={organizationCode}
-              onChange={({ target }) => setOrganizationCode(target.value)}
+              onChange={({ target }) => {
+                // Only allow numbers
+                const value = target.value.replace(/[^0-9]/g, '');
+                // Limit to 14 digits
+                if (value.length <= 14) {
+                  setOrganizationCode(value);
+                }
+              }}
               label="Organization Code"
               placeholder="14 digit code"
               type="text"
+              pattern="[0-9]*"
+              inputMode="numeric"
+              maxLength={14}
               required
             ></Input>
 
-            </div>
+          </div>
 
-            {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
-            <button type="submit" className="btn-primary">
-              SIGN UP
-            </button>
-            <p className="text-[13px] text-slate-800 mt-3">
-              Already a account ?{" "}
-              <Link
-                className="font--medium text-primary underline"
-                to="/login"
-              >
-                Login
-              </Link>
-            </p>
+          {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
+          <button type="submit" className={`btn-primary ${loading ? 'opacity-75' : ''}`} disabled={loading} style={loading ? { cursor: 'not-allowed' } : {}}>
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Signing up...
+              </div>
+            ) : (
+              "SIGN UP"
+            )}
+          </button>
+          <p className="text-[13px] text-slate-800 mt-3">
+            Already a account ?{" "}
+            <Link
+              className="font--medium text-primary underline"
+              to="/login"
+            >
+              Login
+            </Link>
+          </p>
         </form>
       </div>
     </AuthLayout>

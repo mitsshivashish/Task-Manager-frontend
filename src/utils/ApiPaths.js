@@ -15,6 +15,7 @@ export const API_PATHS = {
     VERIFY_OTP: "/api/auth/verify-otp", // Verify OTP for password reset
     RESET_PASSWORD: "/api/auth/reset-password", // Reset password with token
     VERIFY_REGISTRATION_OTP: "/api/auth/verify-registration-otp", // Verify OTP for registration
+    RESEND_REGISTRATION_OTP: "/api/auth/resend-otp", // Resend OTP for registration
   },
 
   USERS: {
