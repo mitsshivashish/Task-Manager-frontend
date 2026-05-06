@@ -9,6 +9,7 @@ import { API_PATHS } from "../../utils/ApiPaths";
 import { UserContext } from "../../context/userContext";
 import uploadImage from "../../utils/uploadImage";
 import toast from "react-hot-toast";
+import imageCompression from "browser-image-compression";
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -69,10 +70,21 @@ const SignUp = () => {
     setError("");
 
     try {
-      const imgUploadRes = await uploadImage(profilePic)
+
+      const compressedFile = await imageCompression(profilePic, {
+        maxSizeMB: 0.15,
+        maxWidthOrHeight: 300,
+     });
+
+     console.time("Total Signup Flow");
+
+      console.time("Image Upload");
+      const imgUploadRes = await uploadImage(compressedFile);
+      console.timeEnd("Image Upload");
       profileImageUrl = imgUploadRes.imageUrl || ""
 
-      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+      console.time("Register API");
+      await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: fullName,
         email,
         password,
@@ -81,8 +93,14 @@ const SignUp = () => {
         organizationCode
       })
 
+      console.timeEnd("Register API");
+
+      console.time("Navigation");
       // Registration now requires OTP verification
       navigate("/verify-otp", { state: { email, isRegistration: true } });
+      console.timeEnd("Navigation");
+
+      console.timeEnd("Total Signup Flow");
 
     } catch (error) {
       if (error.response && error.response.data.message) {
