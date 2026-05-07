@@ -33,7 +33,6 @@ https://task-manager-backend-99rj.onrender.com
 ## 🖥 Dashboard Preview
 
 ### Main Dashboard
-Add your dashboard screenshot here:
 
 ![Dashboard](./screenshots/dashboard.png)
 
